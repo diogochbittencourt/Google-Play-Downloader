@@ -21,6 +21,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Messenger;
+import android.util.Log;
 
 import com.github.diogochbittencourt.googleplaydownloader.R;
 import com.github.diogochbittencourt.googleplaydownloader.downloader.DownloadProgressInfo;
@@ -28,6 +29,8 @@ import com.github.diogochbittencourt.googleplaydownloader.downloader.DownloaderC
 import com.github.diogochbittencourt.googleplaydownloader.downloader.Helpers;
 import com.github.diogochbittencourt.googleplaydownloader.downloader.IDownloaderClient;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * This class handles displaying the notification associated with the download queue going on in the download manager.
@@ -133,6 +136,17 @@ public class DownloadNotification implements IDownloaderClient {
             mCurrentNotification.icon = iconResource;
 //            mCurrentNotification.setLatestEventInfo(mContext, mCurrentTitle, mCurrentText,
 //                    mContentIntent);
+
+            try {
+                Method deprecatedMethod = mNotification.getClass().getMethod("setLatestEventInfo", Context.class, CharSequence
+                        .class, CharSequence.class, PendingIntent.class);
+                deprecatedMethod.invoke(mNotification, mContext, mCurrentTitle, mCurrentText, mContentIntent);
+            } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException
+                    | InvocationTargetException e) {
+                Log.w("DownloadNotification", "Method not found", e);
+            }
+
+
             if (ongoingEvent) {
                 mCurrentNotification.flags |= Notification.FLAG_ONGOING_EVENT;
             } else {
@@ -154,6 +168,16 @@ public class DownloadNotification implements IDownloaderClient {
             mNotification.tickerText = mCurrentTitle;
             mNotification.icon = android.R.drawable.stat_sys_download;
 //            mNotification.setLatestEventInfo(mContext, mLabel, mCurrentText, mContentIntent);
+
+            try {
+                Method deprecatedMethod = mNotification.getClass().getMethod("setLatestEventInfo", Context.class, CharSequence
+                        .class, CharSequence.class, PendingIntent.class);
+                deprecatedMethod.invoke(mNotification, mContext, mCurrentTitle, mCurrentText, mContentIntent);
+            } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException
+                    | InvocationTargetException e) {
+                Log.w("DownloadNotification", "Method not found", e);
+            }
+
             mCurrentNotification = mNotification;
         } else {
             mCustomNotification.setCurrentBytes(progress.mOverallProgress);
